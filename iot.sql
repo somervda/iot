@@ -7,6 +7,8 @@ CREATE DATABASE iotdb with OWNER pi;
 
 -- Schema for the iotdb prostgresql database
 
+\c iotdb
+
 CREATE TABLE public.application (
 	id SERIAL PRIMARY KEY,
 	"name" varchar(50) NOT NULL,
