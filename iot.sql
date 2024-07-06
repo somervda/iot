@@ -25,7 +25,7 @@ CREATE TABLE public.device (
 CREATE TABLE public.measurement (
 	id SERIAL PRIMARY KEY,
 	umt int8 NOT NULL,
-	valueS json NOT NULL,
+	data JSONB NOT NULL,
 	application_id int4 REFERENCES public.application(id) ON DELETE CASCADE,
 	device_id int4 REFERENCES public.device(id) ON DELETE CASCADE
 );
