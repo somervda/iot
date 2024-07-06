@@ -2,6 +2,7 @@
 
 import psycopg
 from psycopg.rows import dict_row
+import json
 
 class Dbiot:
 
@@ -28,9 +29,10 @@ class Dbiot:
             # will change the value to a unix epoch
             umt += 946684800 
         sql = ("INSERT INTO measurement (umt,application_id,device_id,data) VALUES (%s, %s,%s,'%s')" %
-            (umt,application_id,device_id,data))
+            (umt,application_id,device_id,json.dumps(data)))
         not self._quiet and print("addMeasurement sql:",sql)
         result = self._cur.execute(sql)
+        self._conn.commit()
         return result
 
 
