@@ -3,7 +3,12 @@ import json
 import urllib.request
 import time
 # Useful select to see recent data
-# select id,umt,to_timestamp(umt) as umtdate,data,application_id,device_id from measurement order by umt desc
+# select measurement.id,umt,to_timestamp(umt) as umtdate,data,application_id,device_id,application.name,device.name from measurement 
+# JOIN application ON measurement.application_id = application.id
+# JOIN device ON measurement.device_id = device.id
+# order by umt desc
+
+
 while True:
     try:
         contents = urllib.request.urlopen("http://somerville.noip.me:37007/read?user=david").read()
