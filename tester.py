@@ -1,5 +1,29 @@
 from dbiot import Dbiot
+import json
+import urllib.request
+import time
+# Useful select to see recent data
+# select id,umt,to_timestamp(umt) as umtdate,data,application_id,device_id from measurement order by umt desc
+while True:
+    contents = urllib.request.urlopen("http://somerville.noip.me:37007/read?user=david").read()
+    if contents.decode('ascii')=='None':
+        print("end of data - sleeping 3 minutes...")
+        time.sleep(180)
+    else:
+        data = json.loads(contents)
+        application_id = data["appID"]
+        del data["appID"]
+        device_id = data["deviceID"]
+        del data["deviceID"]
+        umt = data["sensorTimestamp"]
+        del data["sensorTimestamp"]
+        del data["iotTimestamp"]
 
-db = Dbiot(quiet=False)
-print(db.addMeasurement(1,1,1,{"temprature":24}))
-db = None
+        print(data)
+
+        db = Dbiot(quiet=False)
+        print(db.addMeasurement(umt,application_id,device_id,data,adjustEpoch=False))
+
+        # print(Dbiot.listTable("select cast(to_timestamp(umt) as date) as umtdate from measurement"))
+        db = None
+        time.sleep(1)
