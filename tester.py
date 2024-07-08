@@ -3,11 +3,13 @@ import json
 import urllib.request
 import time
 # Useful select to see recent data
-# select measurement.id,umt,to_timestamp(umt) as umtdate,data,application_id,device_id,application.name,device.name from measurement 
+# select measurement.id,umt,to_timestamp(umt) as umtdate,data,
+# ((data->>'celsius')::numeric * 9/5) + 32 as fahrenheit,
+# application_id,device_id,application.name,device.name from measurement 
 # JOIN application ON measurement.application_id = application.id
 # JOIN device ON measurement.device_id = device.id
 # order by umt desc
-
+# limit 10
 
 while True:
     try:
