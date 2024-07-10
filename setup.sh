@@ -58,3 +58,9 @@ sudo cp iotLoader.service /lib/systemd/system/iotLoader.service
 # sudo systemctl enable iotLoader.service
 # sudo systemctl start iotLoader.service 
 sudo systemctl status iotLoader.service -n50
+
+
+echo Install fastapi for web services and a ASGI web server
+pip install fastapi --break-system-package
+pip install "uvicorn[standard]" --break-system-package
+pip install python-multipart --break-system-package
