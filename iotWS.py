@@ -50,7 +50,7 @@ def getMeasurements(application_id: Annotated[int, Path(title="application_id: S
     sql += "\nORDER BY umt desc"
     sql += "\nLIMIT " + str(rows)
     not _quiet and print("sql:",sql)
-    iotData = db.listTable()
+    iotData = db.listTable(sql)
     db = None    
     return iotData
 

@@ -45,6 +45,19 @@ createuser pi -P --interactive
 # psql
 # \i iot.sql
 
+# To configure for remote connection
+# sudo find / -name "postgresql.conf"
+# if conf file is at /etc/postgresql/15/main/postgresql.conf
+# sudo nano /etc/postgresql/15/main/postgresql.conf 
+# Change:listen_addresses = '*'
+# also
+#  sudo find / -name "pg_hba.conf"
+#  sudo nano /etc/postgresql/15/main/pg_hba.conf
+# IPv4 local connections: change
+#  host    all             all             0.0.0.0/0            scram-sha-256
+#  Restart postgresql
+#  sudo service postgresql restart
+
 # Install the python postgresql client library
 # Note: Use sudo rm /usr/lib/python3.*/EXTERNALLY-MANAGED
 #       to remove the python --break-system-package requirement
@@ -64,3 +77,4 @@ echo Install fastapi for web services and a ASGI web server
 pip install fastapi --break-system-package
 pip install "uvicorn[standard]" --break-system-package
 pip install python-multipart --break-system-package
+export PATH=$PATH:$HOME/.local/bin
