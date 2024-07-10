@@ -1,0 +1,15 @@
+[Unit]
+Description=iotLoader Startup
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi  
+WorkingDirectory=/home/pi/iot
+Restart=always
+ExecStart=/usr/bin/python3 /home/pi/iot/iotLoader.py
+
+[Install]
+WantedBy=multi-user.target

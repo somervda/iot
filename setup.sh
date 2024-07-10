@@ -51,4 +51,10 @@ createuser pi -P --interactive
 pip install psycopg --break-system-package
 
 
-
+# Add iotLoader.service to the /lib/systemd/system/ folder
+# By default service is not enabled 
+echo Setup the iotLoader.service to run on startup 
+sudo cp iotLoader.service /lib/systemd/system/iotLoader.service
+# sudo systemctl enable iotLoader.service
+# sudo systemctl start iotLoader.service 
+sudo systemctl status iotLoader.service -n50
