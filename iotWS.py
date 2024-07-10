@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+# Note for testing 
+# uvicorn iotWS:app --reload --host pi3.home
+
 import sys
 import time
 import asyncio
