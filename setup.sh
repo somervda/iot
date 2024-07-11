@@ -72,9 +72,18 @@ sudo cp iotLoader.service /lib/systemd/system/iotLoader.service
 # sudo systemctl start iotLoader.service 
 sudo systemctl status iotLoader.service -n50
 
-
 echo Install fastapi for web services and a ASGI web server
 pip install fastapi --break-system-package
 pip install "uvicorn[standard]" --break-system-package
 pip install python-multipart --break-system-package
 export PATH=$PATH:$HOME/.local/bin
+
+# Add iotWS.service to the /lib/systemd/system/ folder
+# By default service is not enabled 
+echo Setup the iotWS.service to run on startup 
+sudo cp iotWS.service /lib/systemd/system/iotWS.service
+# sudo systemctl enable iotWS.service
+# sudo systemctl start iotWS.service 
+sudo systemctl status iotWS.service -n50
+
+

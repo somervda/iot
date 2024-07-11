@@ -40,7 +40,7 @@ def getMeasurements(application_id: Annotated[int, Path(title="application_id: S
     not _quiet and print("getMeasurements:",application_id,device_id,timestamp,rows)
     # get and return data
     db = Dbiot(quiet=False)
-    iotData = db.getMeasurements(application_id,device_id,timestamp,rows,uvicorn iotWS:app --reload --host pi3.homeuvicorn iotWS:app --reload --host pi3.homegrouping)
+    iotData = db.getMeasurements(application_id,device_id,timestamp,rows,grouping)
     db = None    
     return iotData
 

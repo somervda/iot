@@ -1,0 +1,15 @@
+[Unit]
+Description=IOT Webservice (Runs Uvicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi  
+WorkingDirectory=/home/pi/iot
+ExecStart=/home/pi/.local/bin/uvicorn \
+        --host pi3.home iotWS:app
+
+[Install]
+WantedBy=multi-user.target
