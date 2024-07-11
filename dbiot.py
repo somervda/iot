@@ -21,6 +21,14 @@ class Dbiot:
         self._cur.execute(sql)
         return self._cur.fetchall()
 
+    def getApplicationMeasurements(self,application_id):
+        not self._quiet and print("getApplicationMeasurements:",application_id)
+        sql = "SELECT measurements FROM application WHERE id=" + str(application_id)
+        self._cur.execute(sql)
+        return self._cur.fetchone()["measurements"]
+
+    
+
     def addMeasurement(self, umt,application_id,device_id,data,adjustEpoch=False):
         not self._quiet and print("addMeasurement",umt,application_id,device_id,data,adjustEpoch)
         # umt is Universal Metric Time in seconds since 1Jan1970 (UNIX epoch)
@@ -35,6 +43,55 @@ class Dbiot:
         self._conn.commit()
         return result
 
+
+    def getMeasurements(self,application_id,device_id,timestamp,rows,grouping):
+        # grouping values 0=None, 1=hour,2=day,3=week,4=month,5=year
+        not self._quiet and print("getMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping)
+        applicationMeasurements=self.getApplicationMeasurements(application_id)
+        # get and return data
+        sql = "select measurement.id,umt,"
+        for measurement in applicationMeasurements:
+            if applicationMeasurements[measurement] == "number":
+                sql += "\nCAST(data->'" + measurement + "'  as DOUBLE PRECISION) as " + measurement +","
+        sql += "\ndevice_id,application_id from measurement"
+        sql += "\nWHERE application_id = " + str(application_id) 
+        sql += "\nAND umt>=" + str(timestamp)
+        if device_id != 0:
+            sql += "\nAND device_id=" + str(device_id) 
+        sql += "\nORDER BY umt desc"
+        groupingSQL = "SELECT date_part('epoch',date_trunc('"
+        if grouping==1:
+            groupingSQL += "hour"
+        if grouping==2:
+            groupingSQL += "day"
+        if grouping==3:
+            groupingSQL += "week"
+        if grouping==4:
+            groupingSQL += "month"
+        if grouping==5:
+            groupingSQL += "year"
+        groupingSQL += "',to_timestamp(UMT))) as date ,\n MAX(device_id) as device_id,MAX(application_id) as application_id,"
+        for measurement in applicationMeasurements:
+            if applicationMeasurements[measurement] == "number":
+                groupingSQL += "\nAVG(" + measurement + ") as avg_" + measurement + ","
+                groupingSQL += "MAX(" + measurement + ") as max_" + measurement + ","
+                groupingSQL += "MIN(" + measurement + ") as min_" + measurement + ","
+        groupingSQL += "\ncount(umt) FROM (" + sql + ") as foo GROUP BY date,device_id "
+        if device_id != 0:
+            # also group by device id if more than one selected (device_id!=0)
+            sql += ", device_id" 
+        groupingSQL += " ORDER BY date"
+        # AVG(celsius),count(umt) FROM (" + sql + ") as foo GROUP BY date ORDER BY date" 
+        if grouping==0:
+            sql += "\nLIMIT " + str(rows)
+            not self._quiet and print("sql:",sql)
+            self._cur.execute(sql)
+        else:
+            groupingSQL += "\nLIMIT " + str(rows)
+            not self._quiet and print("sql:",groupingSQL)
+            self._cur.execute(groupingSQL)
+        return self._cur.fetchall()
+   
 
     def __del__(self):
         not self._quiet and print("__del__")

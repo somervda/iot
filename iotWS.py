@@ -29,28 +29,18 @@ app.add_middleware(
 )
 
 
-@app.get("/measurements/{application_id}/{device_id}/{timestamp}/{rows}")
+@app.get("/measurements/{application_id}/{device_id}/{timestamp}/{rows}/{grouping}")
 def getMeasurements(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
     device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=0)], 
     timestamp: Annotated[int, Path(title="timestamp in seconds since 1Jan1970 to retrieve", ge=0)],
-    rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=1000)]):
+    rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=1000)],
+    grouping: Annotated[int, Path(title="grouping: 0=None, 1=hour,2=day,3=week,4=month,5=year", ge=0,le=5)]
+    ):
 
     not _quiet and print("getMeasurements:",application_id,device_id,timestamp,rows)
     # get and return data
     db = Dbiot(quiet=False)
-    sql = """select measurement.id,umt,to_timestamp(umt) as umtdate,data, 
-            ((data->>'celsius')::numeric * 9/5) + 32 as fahrenheit,
-            device_id,application_id,application.name,device.name from measurement 
-            JOIN application ON measurement.application_id = application.id
-            JOIN device ON measurement.device_id = device.id
-            WHERE application_id = """ + str(application_id) 
-    sql += "\nAND umt>=" + str(timestamp)
-    if device_id != 0:
-        sql += "\nAND device_id=" + str(device_id) 
-    sql += "\nORDER BY umt desc"
-    sql += "\nLIMIT " + str(rows)
-    not _quiet and print("sql:",sql)
-    iotData = db.listTable(sql)
+    iotData = db.getMeasurements(application_id,device_id,timestamp,rows,uvicorn iotWS:app --reload --host pi3.homeuvicorn iotWS:app --reload --host pi3.homegrouping)
     db = None    
     return iotData
 

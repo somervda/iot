@@ -12,7 +12,8 @@ CREATE DATABASE iotdb with OWNER pi;
 CREATE TABLE public.application (
 	id SERIAL PRIMARY KEY,
 	"name" varchar(50) NOT NULL,
-	description varchar(2000) NULL
+	description varchar(2000) NULL,
+	measurements JSONB NOT NULL
 );
 
 CREATE TABLE public.device (
