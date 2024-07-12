@@ -16,12 +16,19 @@ CREATE TABLE public.application (
 	measurements JSONB NOT NULL
 );
 
+INSERT INTO public.application ("name",description,measurements)
+	VALUES ('Climate','Climate','{"hPa": "number", "celsius": "number", "humidity": "number"}'::jsonb);
+
+
 CREATE TABLE public.device (
 	id SERIAL PRIMARY KEY,
 	"name" varchar(50) NOT NULL,
 	description varchar(2000) NULL
 );
-
+INSERT INTO public.device ("name",description)
+	VALUES ('Sensor01','Bed');
+INSERT INTO public.device ("name",description)
+	VALUES ('Sensor02','Piano');
 
 CREATE TABLE public.measurement (
 	id SERIAL PRIMARY KEY,
