@@ -9,7 +9,7 @@ User=pi
 Group=pi  
 WorkingDirectory=/home/pi/iot
 ExecStart=/home/pi/.local/bin/uvicorn \
-        --host pi3.home iotWS:app
+        --host pi4.home iotWS:app
 
 [Install]
 WantedBy=multi-user.target

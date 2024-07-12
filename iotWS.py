@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # Note for testing 
-# uvicorn iotWS:app --reload --host pi3.home
+# uvicorn iotWS:app --reload --host pi4.home
 
 import sys
 import time
