@@ -86,4 +86,7 @@ sudo cp iotWS.service /lib/systemd/system/iotWS.service
 # sudo systemctl start iotWS.service 
 sudo systemctl status iotWS.service -n50
 
+# Install smbclient if backimg up db to network share
+sudo apt install smbclient
+
 
