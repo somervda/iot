@@ -44,7 +44,45 @@ def getMeasurements(application_id: Annotated[int, Path(title="application_id: S
     db = None    
     return iotData
 
+@app.get("/devices")
+def getDevices():
+    not _quiet and print("getDevices")
+    # get and return data
+    db = Dbiot(quiet=False)
+    sql = "select * from device"
+    devices = db.listTable(sql)
+    db = None    
+    return devices
+    
+@app.get("/device/{device_id}")
+def getDevice(device_id: Annotated[int, Path(title="device_id: Device selector", ge=1)]):
+    not _quiet and print("getDevice",device_id)
+    # get and return data
+    db = Dbiot(quiet=False)
+    sql = "select * from device where id=" + str(device_id)
+    device = db.listTable(sql)
+    db = None    
+    return device
 
+@app.get("/applications")
+def getApplications():
+    not _quiet and print("getApplications")
+    # get and return data
+    db = Dbiot(quiet=False)
+    sql = "select * from application"
+    applications = db.listTable(sql)
+    db = None    
+    return applications
+    
+@app.get("/application/{application_id}")
+def getDevice(application_id: Annotated[int, Path(title="application_id: Application selector", ge=1)]):
+    not _quiet and print("getApplication",application_id)
+    # get and return data
+    db = Dbiot(quiet=False)
+    sql = "select * from application where id=" + str(application_id)
+    application = db.listTable(sql)
+    db = None    
+    return application
 
 
 # Note: Make sure this line is at the end of the file so fastAPI falls through the other
