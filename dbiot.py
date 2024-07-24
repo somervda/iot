@@ -128,12 +128,39 @@ class Dbiot:
         result = []
         try:
             for measurement in fullResult:
-                result.append({"umt":measurement["umt"],"0":measurement[field]})
+                result.append({"umt":measurement["umt"],str(measurement["device_id"]):measurement[field]})
         except Exception as error:
             not self._quiet and print("An exception occurred, field name error:", error)
             result=[]
-        return result
-   
+        # change iotData into a series structure ["name":"0","series":[{"umt":nnn,"value":nnnn}]]
+        resultSeries = []
+        for measurement in result:
+            umt = measurement["umt"]
+            for keys in measurement.keys():
+                if keys != "umt":
+                    device_id = keys
+                    value = measurement.get(keys,None)
+            self.addToSeries(resultSeries,umt,device_id,value)
+        return resultSeries
+
+    def addToSeries(self,resultSeries,umt,device_id,value):
+        deviceSeries = None
+        for series in resultSeries:
+            if series.get("name",-1) == int(device_id):
+                # Series exists for the device
+                deviceSeries=series
+                break
+        if deviceSeries==None:
+            resultSeries.append({"name":int(device_id),"series": []})
+            for series in resultSeries:
+                if series.get("name",-1) == int(device_id):
+                    deviceSeries=series
+                    break
+        deviceSeries["series"].append({"umt":int(umt),"value":value})
+        return resultSeries
+        
+
+
 
     def __del__(self):
         not self._quiet and print("__del__")

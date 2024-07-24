@@ -14,18 +14,21 @@ order by umt desc
 limit 10
 
 Example: Group into daily trends
-SELECT to_timestamp(date_part('epoch',date_trunc('day',to_timestamp(UMT)))) as date
-,MAX(device_id) as device_id,MAX(application_id) as application_id,
-AVG(fahrenheit) as avg_fahrenheit,
-count(umt) FROM (
-select measurement.id,umt,to_timestamp(umt) as umtdate,data,
-((data->>'celsius')::numeric * 9/5) + 32 as fahrenheit,
-device_id,application_id,application.name,device.name from measurement 
-JOIN application ON measurement.application_id = application.id
-JOIN device ON measurement.device_id = device.id
-) as foo 
-GROUP BY date,device_id 
-ORDER BY date desc
+select to_timestamp(groupumt) as umtdate,* from (
+SELECT date_part('epoch',date_bin('15 minutes',to_timestamp(UMT),TIMESTAMP '2001-01-01')) as groupumt ,
+ MAX(device_id) as device_id,MAX(application_id) as application_id,
+AVG(hPa) as avg_hPa,MAX(hPa) as max_hPa,MIN(hPa) as min_hPa,
+AVG(celsius) as avg_celsius,MAX(celsius) as max_celsius,MIN(celsius) as min_celsius,
+AVG(humidity) as avg_humidity,MAX(humidity) as max_humidity,MIN(humidity) as min_humidity,
+count(umt) FROM (select measurement.id,umt,
+CAST(data->'hPa'  as DOUBLE PRECISION) as hPa,
+CAST(data->'celsius'  as DOUBLE PRECISION) as celsius,
+CAST(data->'humidity'  as DOUBLE PRECISION) as humidity,
+device_id,application_id from measurement
+WHERE application_id = 1
+AND umt>=0
+ORDER BY umt desc) as foo GROUP BY groupumt,device_id  ORDER BY groupumt
+LIMIT 10) as fo2
 
 """
 

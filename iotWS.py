@@ -34,7 +34,7 @@ def getRawMeasurements(application_id: Annotated[int, Path(title="application_id
     device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=0)], 
     timestamp: Annotated[int, Path(title="timestamp in seconds since 1Jan1970 to retrieve", ge=0)],
     rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=1000)],
-    grouping: Annotated[int, Path(title="grouping: 0=None, 1=hour,2=day,3=week,4=month,5=year", ge=0,le=9)]
+    grouping: Annotated[int, Path(title="grouping: 0=None, 1=5 minutes,2=15 minutes,3=hour,4=6 hours, 5=day,6=week,7=month,8=3 month,9=year", ge=0,le=9)]
     ):
 
     not _quiet and print("getRawMeasurements:",application_id,device_id,timestamp,rows,grouping)
@@ -45,16 +45,34 @@ def getRawMeasurements(application_id: Annotated[int, Path(title="application_id
     return iotData
 
 @app.get("/flatmeasurements/{application_id}/{device_id}/{timestamp}/{rows}/{grouping}/{field}")
-def getFlatMeasurementsField(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
+def getFlatMeasurements(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
     device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=0)], 
     timestamp: Annotated[int, Path(title="timestamp in seconds since 1Jan1970 to retrieve", ge=0)],
     rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=1000)],
-    grouping: Annotated[int, Path(title="grouping: 0=None, 1=hour,2=day,3=week,4=month,5=year", ge=0,le=9)],
+    grouping: Annotated[int, Path(title="grouping: 0=None, 1=5 minutes,2=15 minutes,3=hour,4=6 hours, 5=day,6=week,7=month,8=3 month,9=year", ge=0,le=9)],
     field: Annotated[str, Path(title="field name")]
     ):
-    not _quiet and print("getFlatMeasurementsField:",application_id,device_id,timestamp,rows,grouping,field)
+    # Get single measurement and return results a flatend json table (one entry per umt time, with multiple values representing each device)
+    # This format is useful for grid lists and use in external programs like excel
+    not _quiet and print("getFlatMeasurements:",application_id,device_id,timestamp,rows,grouping,field)
     db = Dbiot(quiet=False)
     iotData = db.getFlatMeasurements(application_id,device_id,timestamp,rows,grouping,field)
+    db = None
+    return iotData
+
+@app.get("/seriesmeasurements/{application_id}/{device_id}/{timestamp}/{rows}/{grouping}/{field}")
+def getSeriesMeasurement(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
+    device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=0)], 
+    timestamp: Annotated[int, Path(title="timestamp in seconds since 1Jan1970 to retrieve", ge=0)],
+    rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=1000)],
+    grouping: Annotated[int, Path(title="grouping: 0=None, 1=5 minutes,2=15 minutes,3=hour,4=6 hours, 5=day,6=week,7=month,8=3 month,9=year", ge=0,le=9)],
+    field: Annotated[str, Path(title="field name")]
+    ):
+    # Get single measurement and return results a collection of series (one series for each device with a dict of time and values for that device)
+    # This format is useful for charting using ngx-charts
+    not _quiet and print("getSeriesMeasurements:",application_id,device_id,timestamp,rows,grouping,field)
+    db = Dbiot(quiet=False)
+    iotData = db.getSeriesMeasurements(application_id,device_id,timestamp,rows,grouping,field)
     db = None
     return iotData
 
