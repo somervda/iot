@@ -44,9 +44,9 @@ class Dbiot:
         return result
 
 
-    def getMeasurements(self,application_id,device_id,timestamp,rows,grouping):
-        # grouping values 0=None, 1=hour,2=day,3=week,4=month,5=year
-        not self._quiet and print("getMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping)
+    def getRawMeasurements(self,application_id,device_id,timestamp,rows,grouping):
+        # grouping values 0=None, 1=5 minutes,2=15 minutes,3=hour,4=6 hours, 5=day,6=week,7=month,8=3 month,9=year
+        not self._quiet and print("getRawMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping)
         applicationMeasurements=self.getApplicationMeasurements(application_id)
         # get and return data
         sql = "select measurement.id,umt,"
@@ -59,28 +59,37 @@ class Dbiot:
         if device_id != 0:
             sql += "\nAND device_id=" + str(device_id) 
         sql += "\nORDER BY umt desc"
-        groupingSQL = "SELECT date_part('epoch',date_trunc('"
+        groupingSQL = "SELECT date_part('epoch',"
         if grouping==1:
-            groupingSQL += "hour"
+            groupingSQL += "date_bin('5 minutes',to_timestamp(UMT),TIMESTAMP '2001-01-01')"
         if grouping==2:
-            groupingSQL += "day"
+            groupingSQL += "date_bin('15 minutes',to_timestamp(UMT),TIMESTAMP '2001-01-01')"
         if grouping==3:
-            groupingSQL += "week"
+            groupingSQL += "date_bin('1 hour',to_timestamp(UMT),TIMESTAMP '2001-01-01')"
         if grouping==4:
-            groupingSQL += "month"
+            groupingSQL += "date_bin('6 hours',to_timestamp(UMT),TIMESTAMP '2001-01-01')"
         if grouping==5:
-            groupingSQL += "year"
-        groupingSQL += "',to_timestamp(UMT))) as date ,\n MAX(device_id) as device_id,MAX(application_id) as application_id,"
+            groupingSQL += "date_trunc('day',to_timestamp(UMT))"
+        if grouping==6:
+            groupingSQL += "date_trunc('week',to_timestamp(UMT))"
+        if grouping==7:
+            groupingSQL += "date_trunc('month',to_timestamp(UMT))"
+        if grouping==8:
+            groupingSQL += "date_trunc('quarter',to_timestamp(UMT))"
+        if grouping==9:
+            groupingSQL += "date_trunc('year',to_timestamp(UMT))"
+        groupingSQL += ") as groupumt ,\n MAX(device_id) as device_id,MAX(application_id) as application_id,"
+        # groupingSQL += "\ndate as umt,"
         for measurement in applicationMeasurements:
             if applicationMeasurements[measurement] == "number":
                 groupingSQL += "\nAVG(" + measurement + ") as avg_" + measurement + ","
                 groupingSQL += "MAX(" + measurement + ") as max_" + measurement + ","
                 groupingSQL += "MIN(" + measurement + ") as min_" + measurement + ","
-        groupingSQL += "\ncount(umt) FROM (" + sql + ") as foo GROUP BY date,device_id "
+        groupingSQL += "\ncount(umt) FROM (" + sql + ") as foo GROUP BY groupumt,device_id "
         if device_id != 0:
             # also group by device id if more than one selected (device_id!=0)
             sql += ", device_id" 
-        groupingSQL += " ORDER BY date"
+        groupingSQL += " ORDER BY groupumt"
         # AVG(celsius),count(umt) FROM (" + sql + ") as foo GROUP BY date ORDER BY date" 
         if grouping==0:
             sql += "\nLIMIT " + str(rows)
@@ -90,7 +99,40 @@ class Dbiot:
             groupingSQL += "\nLIMIT " + str(rows)
             not self._quiet and print("sql:",groupingSQL)
             self._cur.execute(groupingSQL)
-        return self._cur.fetchall()
+        result = self._cur.fetchall()
+        if grouping!=0:
+            # Rename the groupumt dict item for grouped results
+            for measurement in result:
+                measurement["umt"] = measurement.pop("groupumt")
+        return result
+
+    def getFlatMeasurements(self,application_id,device_id,timestamp,rows,grouping,field):
+        not self._quiet and print("getFlatMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping," field=",field)
+        # Just return specific requested field
+        fullResult = self.getRawMeasurements(application_id,device_id,timestamp,rows,grouping)
+        # Just return date and selected field
+        result = []
+        try:
+            for measurement in fullResult:
+                result.append({"umt":measurement["umt"],"0":measurement[field]})
+        except Exception as error:
+            not self._quiet and print("An exception occurred, field name error:", error)
+            result=[]
+        return result
+
+    def getSeriesMeasurements(self,application_id,device_id,timestamp,rows,grouping,field):
+        not self._quiet and print("getSeriesMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping," field=",field)
+        # Just return specific requested field
+        fullResult = self.getRawMeasurements(application_id,device_id,timestamp,rows,grouping)
+        # Just return date and selected field
+        result = []
+        try:
+            for measurement in fullResult:
+                result.append({"umt":measurement["umt"],"0":measurement[field]})
+        except Exception as error:
+            not self._quiet and print("An exception occurred, field name error:", error)
+            result=[]
+        return result
    
 
     def __del__(self):

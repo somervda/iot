@@ -30,19 +30,34 @@ app.add_middleware(
 
 
 @app.get("/measurements/{application_id}/{device_id}/{timestamp}/{rows}/{grouping}")
-def getMeasurements(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
+def getRawMeasurements(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
     device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=0)], 
     timestamp: Annotated[int, Path(title="timestamp in seconds since 1Jan1970 to retrieve", ge=0)],
     rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=1000)],
-    grouping: Annotated[int, Path(title="grouping: 0=None, 1=hour,2=day,3=week,4=month,5=year", ge=0,le=5)]
+    grouping: Annotated[int, Path(title="grouping: 0=None, 1=hour,2=day,3=week,4=month,5=year", ge=0,le=9)]
     ):
 
-    not _quiet and print("getMeasurements:",application_id,device_id,timestamp,rows)
+    not _quiet and print("getRawMeasurements:",application_id,device_id,timestamp,rows,grouping)
     # get and return data
     db = Dbiot(quiet=False)
-    iotData = db.getMeasurements(application_id,device_id,timestamp,rows,grouping)
+    iotData = db.getRawMeasurements(application_id,device_id,timestamp,rows,grouping)
     db = None    
     return iotData
+
+@app.get("/flatmeasurements/{application_id}/{device_id}/{timestamp}/{rows}/{grouping}/{field}")
+def getFlatMeasurementsField(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
+    device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=0)], 
+    timestamp: Annotated[int, Path(title="timestamp in seconds since 1Jan1970 to retrieve", ge=0)],
+    rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=1000)],
+    grouping: Annotated[int, Path(title="grouping: 0=None, 1=hour,2=day,3=week,4=month,5=year", ge=0,le=9)],
+    field: Annotated[str, Path(title="field name")]
+    ):
+    not _quiet and print("getFlatMeasurementsField:",application_id,device_id,timestamp,rows,grouping,field)
+    db = Dbiot(quiet=False)
+    iotData = db.getFlatMeasurements(application_id,device_id,timestamp,rows,grouping,field)
+    db = None
+    return iotData
+
 
 @app.get("/devices")
 def getDevices():
