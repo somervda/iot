@@ -21,11 +21,11 @@ class Dbiot:
         self._cur.execute(sql)
         return self._cur.fetchall()
 
-    def getApplicationMeasurements(self,application_id):
-        not self._quiet and print("getApplicationMeasurements:",application_id)
-        sql = "SELECT measurements FROM application WHERE id=" + str(application_id)
+    def getApplicationFields(self,application_id):
+        not self._quiet and print("getApplicationFields:",application_id)
+        sql = "SELECT fields FROM application WHERE id=" + str(application_id)
         self._cur.execute(sql)
-        return self._cur.fetchone()["measurements"]
+        return self._cur.fetchone()["fields"]
 
     
 
@@ -47,12 +47,11 @@ class Dbiot:
     def getRawMeasurements(self,application_id,device_id,timestamp,rows,grouping):
         # grouping values 0=None, 1=5 minutes,2=15 minutes,3=hour,4=6 hours, 5=day,6=week,7=month,8=3 month,9=year
         not self._quiet and print("getRawMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping)
-        applicationMeasurements=self.getApplicationMeasurements(application_id)
+        applicationFields=self.getApplicationFields(application_id)
         # get and return data
         sql = "select measurement.id,umt,"
-        for measurement in applicationMeasurements:
-            if applicationMeasurements[measurement] == "number":
-                sql += "\nCAST(data->'" + measurement + "'  as DOUBLE PRECISION) as " + measurement +","
+        for field in applicationFields:
+            sql += "\nCAST(data->'" + field + "'  as DOUBLE PRECISION) as " + field +","
         sql += "\ndevice_id,application_id from measurement"
         sql += "\nWHERE application_id = " + str(application_id) 
         sql += "\nAND umt>=" + str(timestamp)
@@ -80,11 +79,10 @@ class Dbiot:
             groupingSQL += "date_trunc('year',to_timestamp(UMT))"
         groupingSQL += ") as groupumt ,\n MAX(device_id) as device_id,MAX(application_id) as application_id,"
         # groupingSQL += "\ndate as umt,"
-        for measurement in applicationMeasurements:
-            if applicationMeasurements[measurement] == "number":
-                groupingSQL += "\nAVG(" + measurement + ") as avg_" + measurement + ","
-                groupingSQL += "MAX(" + measurement + ") as max_" + measurement + ","
-                groupingSQL += "MIN(" + measurement + ") as min_" + measurement + ","
+        for field in applicationFields:
+            groupingSQL += "\nAVG(" + field + ") as avg_" + field + ","
+            groupingSQL += "MAX(" + field + ") as max_" + field + ","
+            groupingSQL += "MIN(" + field + ") as min_" + field + ","
         groupingSQL += "\ncount(umt) FROM (" + sql + ") as foo GROUP BY groupumt,device_id "
         if device_id != 0:
             # also group by device id if more than one selected (device_id!=0)

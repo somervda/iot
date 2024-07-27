@@ -13,11 +13,11 @@ CREATE TABLE public.application (
 	id SERIAL PRIMARY KEY,
 	"name" varchar(50) NOT NULL,
 	description varchar(2000) NULL,
-	measurements JSONB NOT NULL
+	fields varchar(80)[] 
 );
 
-INSERT INTO public.application ("name",description,measurements)
-	VALUES ('Climate','Climate','{"hPa": "number", "celsius": "number", "humidity": "number"}'::jsonb);
+INSERT INTO public.application ("name",description,fields)
+	VALUES ('Climate','Climate',ARRAY['celsius','humidity','hPa']);
 
 
 CREATE TABLE public.device (
