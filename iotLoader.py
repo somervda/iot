@@ -2,6 +2,7 @@ from dbiot import Dbiot
 import json
 import urllib.request
 import time
+from datetime import datetime
 """ 
 Useful SQL to see recent data
 
@@ -39,15 +40,35 @@ while True:
             print("End of iotCache data - sleeping 30 seconds...")
             time.sleep(30)
         else:
+            print("Loading data:",time.time(),contents)
             data = json.loads(contents)
             application_id = data["appID"]
             del data["appID"]
             device_id = data["deviceID"]
             del data["deviceID"]
-            umt = data["sensorTimestamp"]
-            del data["sensorTimestamp"]
-            del data["iotTimestamp"]
-
+            # Set umt time to best available time when event occured
+            if "sensorTimestamp" in data:
+                # sensorTimestamp is time event occured on the sensor
+                umt = data["sensorTimestamp"]
+            elif "iotTimestamp" in data:
+                # iotTimestamp is when the measurement was sent to the IOT cache
+                umt = data["iotTimestamp"]
+            elif "received" in data:
+                # recieved is the best timestamp seen in hologram.io data if no other timestamps set
+                # Little bit of hacky code to adjust recieve to be interpreted as utc iso date 
+                rumt = time.time( data["iotTimestamp"])
+                dte =datetime.fromisoformat("1970-01-01T00:00:00")
+                dt =datetime.fromisoformat("2024-07-31T09:57:05.324105")
+                utcHologram = time.mktime(dt.timetuple()) - time.mktime(dte.timetuple())
+                umt = utcHologram
+            else:
+                umt = time.time()
+            if "sensorTimestamp" in data:
+                del data["sensorTimestamp"]
+            if "iotTimestamp" in data:
+                del data["iotTimestamp"]
+            if "received" in data:
+                del data["received"]
             print(data)
 
             db = Dbiot(quiet=False)

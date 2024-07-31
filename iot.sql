@@ -30,6 +30,20 @@ INSERT INTO public.device ("name",description)
 INSERT INTO public.device ("name",description)
 	VALUES ('Sensor02','Piano');
 
+-- many to many relationship table, linking applications to a device
+-- one device can support measurements for multiple applications
+-- This also holds the most recient data recieved for the app/dev combination
+-- and the umt time it was recieved
+-- initially umt and data are null until iot data starts to be recieved.
+CREATE TABLE public.applicationDevice (
+	application_id int4 REFERENCES public.application(id) ON DELETE CASCADE,
+	device_id int4 REFERENCES public.device(id) ON DELETE CASCADE,
+	umt int8 ,
+	data JSONB 
+);
+
+CREATE INDEX applicationDevice_idx ON public.applicationDevice (application_id,device_id);
+
 CREATE TABLE public.measurement (
 	id SERIAL PRIMARY KEY,
 	umt int8 NOT NULL,

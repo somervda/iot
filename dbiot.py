@@ -27,19 +27,67 @@ class Dbiot:
         self._cur.execute(sql)
         return self._cur.fetchone()["fields"]
 
+    def deviceExists(self,device_id):
+        not self._quiet and print("deviceExist",device_id)
+        sql = "select count(*) as count from device where id=" + str(device_id)
+        self._cur.execute(sql)
+        result = self._cur.fetchone()["count"]
+        if result == 1:
+            return True
+        else:
+            return False
+
+    def applicationExists(self,application_id):
+        not self._quiet and print("applicationExist",application_id)
+        sql = "select count(*) as count from application where id=" + str(application_id)
+        self._cur.execute(sql)
+        result = self._cur.fetchone()["count"]
+        if result == 1:
+            return True
+        else:
+            return False
+
+    def applicationDeviceExists(self,application_id,device_id):
+        not self._quiet and print("applicationDeviceExists",application_id,device_id)
+        sql = "select count(*) as count from applicationDevice where application_id=" + str(application_id) + " and device_id=" + str(device_id)
+        self._cur.execute(sql)
+        result = self._cur.fetchone()["count"]
+        if result == 1:
+            return True
+        else:
+            return False
+
     
 
     def addMeasurement(self, umt,application_id,device_id,data,adjustEpoch=False):
         not self._quiet and print("addMeasurement",umt,application_id,device_id,data,adjustEpoch)
-        # umt is Universal Metric Time in seconds since 1Jan1970 (UNIX epoch)
         if adjustEpoch:
             # micropython frequently uses a epoch start of 1Jan2000, this flag
             # will change the value to a unix epoch
             umt += 946684800 
+        # Check device is valid
+        if not self.deviceExists(device_id):
+            return("addMeasurement","Device does not exist",device_id)
+        if not self.applicationExists(application_id):
+            return("addMeasurement","Application does not exist",application_id)
+        # Check to see if applicationDevice exist, eitherr update it or create one
+        # applicationDevice is generally self populating, but can be set up first
+        if self.applicationDeviceExists(application_id,device_id):
+            sql = ("UPDATE applicationDevice set umt=%s, data='%s'::jsonb where application_id=%s and device_id=%s" %
+                (umt,json.dumps(data),application_id,device_id))
+            not self._quiet and print("addMeasurement appDev sql:",sql)
+            self._cur.execute(sql)
+        else:
+            sql = ("INSERT INTO applicationDevice (umt,application_id,device_id,data) VALUES (%s, %s,%s,'%s')" %
+                (umt,application_id,device_id,json.dumps(data)))
+            not self._quiet and print("addMeasurement appDev sql:",sql)
+            self._cur.execute(sql)
+        # umt is Universal Metric Time in seconds since 1Jan1970 (UNIX epoch)
         sql = ("INSERT INTO measurement (umt,application_id,device_id,data) VALUES (%s, %s,%s,'%s')" %
             (umt,application_id,device_id,json.dumps(data)))
         not self._quiet and print("addMeasurement sql:",sql)
         result = self._cur.execute(sql)
+        # Createor update a
         self._conn.commit()
         return result
 
