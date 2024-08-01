@@ -106,9 +106,37 @@ def getApplications():
     applications = db.listTable(sql)
     db = None    
     return applications
+
+@app.get("/applicationDevice/{application_id}/{device_id}")
+def getApplicationDevice(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
+    device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=1)]):
+    not _quiet and print("getApplicationDevice",application_id,device_id)
+    # get and return data
+    db = Dbiot(quiet=False)
+    ad = db.getApplicationDevice(application_id,device_id)
+    db = None    
+    return ad
+
+@app.get("/applicationDevices/{application_id}")
+def getApplicationDevice(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)]):
+    not _quiet and print("applicationDevices",application_id)
+    # get and return data
+    db = Dbiot(quiet=False)
+    ad = db.getApplicationDevices(application_id)
+    db = None    
+    return ad
+
+@app.get("/deviceApplications/{device_id}")
+def getDeviceApplications(device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=1)]):
+    not _quiet and print("deviceApplications",device_id)
+    # get and return data
+    db = Dbiot(quiet=False)
+    da = db.getDeviceApplications(device_id)
+    db = None    
+    return da
     
 @app.get("/application/{application_id}")
-def getDevice(application_id: Annotated[int, Path(title="application_id: Application selector", ge=1)]):
+def getApplication(application_id: Annotated[int, Path(title="application_id: Application selector", ge=1)]):
     not _quiet and print("getApplication",application_id)
     # get and return data
     db = Dbiot(quiet=False)

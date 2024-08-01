@@ -57,6 +57,34 @@ class Dbiot:
         else:
             return False
 
+    def getApplicationDevices(self,application_id):
+        # Get the devices that support a particuler application
+        not self._quiet and print("getApplicationDevices",application_id)
+        sql = "select device.*" 
+        sql += "\nfrom applicationDevice "
+        sql += "\nJOIN device ON applicationDevice.device_id = device.id"
+        sql += "\nwhere applicationDevice.application_id =" + str(application_id)
+        return self.listTable(sql)
+
+    def getDeviceApplications(self,device_id):
+        # Get the devices that support a particuler application
+        not self._quiet and print("getDeviceApplications",device_id)
+        sql = "select application.*" 
+        sql += "\nfrom applicationDevice "
+        sql += "\nJOIN application ON applicationDevice.application_id = application.id"
+        sql += "\nwhere applicationDevice.device_id =" + str(device_id)
+        return self.listTable(sql)
+
+    def getApplicationDevice(self,application_id,device_id):
+        # Get the devices that support a particuler application
+        not self._quiet and print("getApplicationDevice",application_id)
+        sql = "select *" 
+        sql += "\nfrom applicationDevice "
+        sql += "\nwhere applicationDevice.device_id =" + str(device_id)
+        sql += "\nand applicationDevice.application_id =" + str(application_id)
+        return self.listTable(sql)
+
+
     
 
     def addMeasurement(self, umt,application_id,device_id,data,adjustEpoch=False):
