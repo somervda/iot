@@ -8,9 +8,10 @@ Useful SQL to see recent data
 
 select measurement.id,umt,to_timestamp(umt) as umtdate,data,
 ((data->>'celsius')::numeric * 9/5) + 32 as fahrenheit,
-device_id,application_id,application.name,device.name from measurement 
+device_id,application_id,application.name,device.name from measurement
 JOIN application ON measurement.application_id = application.id
 JOIN device ON measurement.device_id = device.id
+where measurement.device_id=3
 order by umt desc
 limit 10
 
@@ -30,6 +31,10 @@ WHERE application_id = 1
 AND umt>=0
 ORDER BY umt desc) as foo GROUP BY groupumt,device_id  ORDER BY groupumt
 LIMIT 10) as fo2
+
+
+select to_timestamp(umt) as umtdate,data,device_id,application_id
+from applicationDevice 
 
 """
 

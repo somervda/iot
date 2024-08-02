@@ -27,6 +27,8 @@ class Dbiot:
         self._cur.execute(sql)
         return self._cur.fetchone()["fields"]
 
+# Device
+
     def deviceExists(self,device_id):
         not self._quiet and print("deviceExist",device_id)
         sql = "select count(*) as count from device where id=" + str(device_id)
@@ -37,6 +39,30 @@ class Dbiot:
         else:
             return False
 
+    def addDevice(self,name,description):
+        not self._quiet and print("addDevice",name,description)
+        sql = ("INSERT INTO device (name,description) VALUES ('%s', '%s')" %
+            (name,description))
+        not self._quiet and print("addDevice sql:",sql)
+        result = self._cur.execute(sql)
+        self._conn.commit()
+
+    def deleteDevice(self,id):
+        not self._quiet and print("deleteDevice",id)
+        sql = "delete from device where id=" + str(id)
+        not self._quiet and print("deleteDevice sql:",sql)
+        result = self._cur.execute(sql)
+        self._conn.commit()
+
+    def updateDevice(self,id,name,description):
+        not self._quiet and print("updateDevice",id,name,description)
+        sql = ("update device set name='%s', description='%s' where id=%s"  %
+            (name,description,id))
+        not self._quiet and print("updateDevice sql:",sql)
+        result = self._cur.execute(sql)
+        self._conn.commit()
+
+#  Application
     def applicationExists(self,application_id):
         not self._quiet and print("applicationExist",application_id)
         sql = "select count(*) as count from application where id=" + str(application_id)
@@ -47,6 +73,32 @@ class Dbiot:
         else:
             return False
 
+    def addApplication(self,name,description,fields):
+        # example db.addApplication("t","xxx",['a','b'])
+        not self._quiet and print("addApplication",name,description,fields)
+        sql = ("INSERT INTO application (name,description,fields) VALUES ('%s', '%s',ARRAY %s)" %
+            (name,description,fields))
+        not self._quiet and print("addApplication sql:",sql)
+        result = self._cur.execute(sql)
+        self._conn.commit()
+
+    def deleteApplication(self,id):
+        not self._quiet and print("deleteApplication",id)
+        sql = "delete from application where id=" + str(id)
+        not self._quiet and print("deleteApplication sql:",sql)
+        result = self._cur.execute(sql)
+        self._conn.commit()
+
+    def updateApplication(self,id,name,description,fields):
+        # Eg db.updateApplication(6,"update","new",['x','y','z'])
+        not self._quiet and print("updateApplication",id,name,description,fields)
+        sql = ("update application set name='%s', description='%s', fields=ARRAY %s where id=%s"  %
+            (name,description,fields,id))
+        not self._quiet and print("updateApplication sql:",sql)
+        result = self._cur.execute(sql)
+        self._conn.commit()
+
+# ApplicationDevice
     def applicationDeviceExists(self,application_id,device_id):
         not self._quiet and print("applicationDeviceExists",application_id,device_id)
         sql = "select count(*) as count from applicationDevice where application_id=" + str(application_id) + " and device_id=" + str(device_id)
@@ -84,8 +136,7 @@ class Dbiot:
         sql += "\nand applicationDevice.application_id =" + str(application_id)
         return self.listTable(sql)
 
-
-    
+# Measurement
 
     def addMeasurement(self, umt,application_id,device_id,data,adjustEpoch=False):
         not self._quiet and print("addMeasurement",umt,application_id,device_id,data,adjustEpoch)

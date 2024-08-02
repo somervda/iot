@@ -36,13 +36,14 @@ INSERT INTO public.device ("name",description)
 -- and the umt time it was recieved
 -- initially umt and data are null until iot data starts to be recieved.
 CREATE TABLE public.applicationDevice (
-	application_id int4 REFERENCES public.application(id) ON DELETE CASCADE,
-	device_id int4 REFERENCES public.device(id) ON DELETE CASCADE,
+	application_id int4 not null REFERENCES public.application(id) ON DELETE CASCADE,
+	device_id int4 not null REFERENCES public.device(id) ON DELETE CASCADE,
 	umt int8 ,
-	data JSONB 
+	data JSONB ,
+	constraint pk_applicationDevice PRIMARY KEY (application_id, device_id)
 );
 
-CREATE INDEX applicationDevice_idx ON public.applicationDevice (application_id,device_id);
+
 
 CREATE TABLE public.measurement (
 	id SERIAL PRIMARY KEY,
