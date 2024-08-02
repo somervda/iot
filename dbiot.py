@@ -127,6 +127,16 @@ class Dbiot:
         sql += "\nwhere applicationDevice.device_id =" + str(device_id)
         return self.listTable(sql)
 
+    def getDeviceApplicationsStatus(self,device_id):
+        # Get the applications for a particuler device
+        # and the most reciend measurements
+        not self._quiet and print("getDeviceApplicationsStatus",device_id)
+        sql = "select applicationDevice.*,application.name,application.description" 
+        sql += "\nfrom applicationDevice "
+        sql += "\nJOIN application ON applicationDevice.application_id = application.id"
+        sql += "\nwhere applicationDevice.device_id =" + str(device_id)
+        return self.listTable(sql)
+
     def getApplicationDevice(self,application_id,device_id):
         # Get the devices that support a particuler application
         not self._quiet and print("getApplicationDevice",application_id)

@@ -134,6 +134,16 @@ def getDeviceApplications(device_id: Annotated[int, Path(title="devices_id: Devi
     da = db.getDeviceApplications(device_id)
     db = None    
     return da
+
+@app.get("/deviceApplicationsStatus/{device_id}")
+def getDeviceApplicationsStatus(device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=1)]):
+    not _quiet and print("deviceApplicationsStatus",device_id)
+    # get and return data
+    db = Dbiot(quiet=False)
+    das = db.getDeviceApplicationsStatus(device_id)
+    db = None    
+    return das
+
     
 @app.get("/application/{application_id}")
 def getApplication(application_id: Annotated[int, Path(title="application_id: Application selector", ge=1)]):
