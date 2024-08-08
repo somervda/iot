@@ -17,7 +17,7 @@ CREATE TABLE public.application (
 );
 
 INSERT INTO public.application ("name",description,fields)
-	VALUES ('Climate','Climate',ARRAY['celsius','humidity','hPa']);
+	VALUES ('Climate','Climate',ARRAY['celsius','humidity','hpa']);
 
 
 CREATE TABLE public.device (

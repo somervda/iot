@@ -3,6 +3,7 @@
 import psycopg
 from psycopg.rows import dict_row
 import json
+from datetime import datetime
 
 class Dbiot:
 
@@ -194,7 +195,7 @@ class Dbiot:
         sql += "\nAND umt>=" + str(timestamp)
         if device_id != 0:
             sql += "\nAND device_id=" + str(device_id) 
-        sql += "\nORDER BY umt desc"
+        sql += "\nORDER BY umt asc"
         groupingSQL = "SELECT date_part('epoch',"
         if grouping==1:
             groupingSQL += "date_bin('5 minutes',to_timestamp(UMT),TIMESTAMP '2001-01-01')"
@@ -273,7 +274,7 @@ class Dbiot:
         for measurement in result:
             umt = measurement["umt"]
             value = measurement.get(str(device_id),0)
-            series.append({"umt":int(umt),"value":value})
+            series.append({"name":datetime.fromtimestamp(int(umt)).isoformat(' '),"value":value})
         return series
 
     # def addToSeries(self,resultSeries,umt,device_id,value):
