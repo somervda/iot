@@ -267,32 +267,31 @@ class Dbiot:
         except Exception as error:
             not self._quiet and print("An exception occurred, field name error:", error)
             result=[]
-        # change iotData into a series structure ["name":"0","series":[{"umt":nnn,"value":nnnn}]]
-        resultSeries = []
+        # change iotData into a series structure [{"umt":nnn,"value":nnnn}]
+        # resultSeries = []
+        series=[]
         for measurement in result:
             umt = measurement["umt"]
-            for keys in measurement.keys():
-                if keys != "umt":
-                    device_id = keys
-                    value = measurement.get(keys,None)
-            self.addToSeries(resultSeries,umt,device_id,value)
-        return resultSeries
+            value = measurement.get(str(device_id),0)
+            series.append({"umt":int(umt),"value":value})
+        return series
 
-    def addToSeries(self,resultSeries,umt,device_id,value):
-        deviceSeries = None
-        for series in resultSeries:
-            if series.get("name",-1) == int(device_id):
-                # Series exists for the device
-                deviceSeries=series
-                break
-        if deviceSeries==None:
-            resultSeries.append({"name":int(device_id),"series": []})
-            for series in resultSeries:
-                if series.get("name",-1) == int(device_id):
-                    deviceSeries=series
-                    break
-        deviceSeries["series"].append({"umt":int(umt),"value":value})
-        return resultSeries
+    # def addToSeries(self,resultSeries,umt,device_id,value):
+    #     print(device_id)
+    #     deviceSeries = None
+    #     for series in resultSeries:
+    #         if series.get("name",-1) == int(device_id):
+    #             # Series exists for the device
+    #             deviceSeries=series
+    #             break
+    #     if deviceSeries==None:
+    #         resultSeries.append({"name":int(device_id),"series": []})
+    #         for series in resultSeries:
+    #             if series.get("name",-1) == int(device_id):
+    #                 deviceSeries=series
+    #                 break
+    #     deviceSeries["series"].append({"umt":int(umt),"value":value})
+    #     return resultSeries
         
 
 
