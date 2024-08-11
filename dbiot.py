@@ -184,7 +184,7 @@ class Dbiot:
 
     def getRawMeasurements(self,application_id,device_id,timestamp,rows,grouping):
         # grouping values 0=None, 1=5 minutes,2=15 minutes,3=hour,4=6 hours, 5=day,6=week,7=month,8=3 month,9=year
-        not self._quiet and print("getRawMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping)
+        not self._quiet and print("dbiot getRawMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping)
         applicationFields=self.getApplicationFields(application_id)
         # get and return data
         sql = "select measurement.id,umt,"
@@ -242,31 +242,27 @@ class Dbiot:
                 measurement["umt"] = measurement.pop("groupumt")
         return result
 
-    def getFlatMeasurements(self,application_id,device_id,timestamp,rows,grouping,field):
-        not self._quiet and print("getFlatMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping," field=",field)
+    def getFlatMeasurements(self,application_id,device_id,timestamp,rows,grouping):
+        not self._quiet and print("dbiot getFlatMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping)
         # Just return specific requested field
         fullResult = self.getRawMeasurements(application_id,device_id,timestamp,rows,grouping)
-        # Just return date and selected field
-        result = []
-        try:
-            for measurement in fullResult:
-                result.append({"umt":measurement["umt"],"0":measurement[field]})
-        except Exception as error:
-            not self._quiet and print("An exception occurred, field name error:", error)
-            result=[]
-        return result
+        # Just return data  and umt date in iso format
+        for measurement in fullResult:
+            measurement["date"] = datetime.fromtimestamp(int(measurement["umt"])).isoformat(' ')
+        return fullResult
 
     def getSeriesMeasurements(self,application_id,device_id,timestamp,rows,grouping,field):
-        not self._quiet and print("getSeriesMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping," field=",field)
+        not self._quiet and print("dbiot getSeriesMeasurements: app=",application_id," dev=",device_id," timestamp=",timestamp," rows=",rows, " grouping=",grouping," field=",field)
         # Just return specific requested field
         fullResult = self.getRawMeasurements(application_id,device_id,timestamp,rows,grouping)
         # Just return date and selected field
         result = []
         try:
             for measurement in fullResult:
-                result.append({"umt":measurement["umt"],str(measurement["device_id"]):measurement[field]})
+                # Need to lowercase the field name , postgress seems to return lower case field names
+                result.append({"umt":measurement["umt"],str(measurement["device_id"]):measurement[field.lower()]})
         except Exception as error:
-            not self._quiet and print("An exception occurred, field name error:", error)
+            not self._quiet and print("dbiot getSeriesMeasurements: An exception occurred, field name error:", error)
             result=[]
         # change iotData into a series structure [{"umt":nnn,"value":nnnn}]
         # resultSeries = []
