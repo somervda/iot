@@ -3,6 +3,10 @@ import json
 import urllib.request
 import time
 from datetime import datetime
+from settings import Settings
+
+# Load Setting
+settings = Settings()
 """ 
 Useful SQL to see recent data
 
@@ -40,7 +44,9 @@ from applicationDevice
 
 while True:
     try:
-        contents = urllib.request.urlopen("http://somerville.noip.me:37007/read?user=david").read()
+        user = settings.getUSER()
+        port = str(settings.getPORT())
+        contents = urllib.request.urlopen("http://somerville.noip.me:" + port + "/read?user=" + user).read()
         if contents.decode('ascii')=='None':
             print("End of iotCache data - sleeping 30 seconds...")
             time.sleep(30)
