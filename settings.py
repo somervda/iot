@@ -18,3 +18,9 @@ class Settings:
 
     def getUSER(self):
         return self._settings.get("USER","")
+
+    def getHOST(self):
+        return self._settings.get("HOST","")
+
+    def getLOADSECONDS(self):
+        return self._settings.get("LOADSECONDS",30)

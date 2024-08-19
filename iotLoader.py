@@ -46,10 +46,12 @@ while True:
     try:
         user = settings.getUSER()
         port = str(settings.getPORT())
-        contents = urllib.request.urlopen("http://somerville.noip.me:" + port + "/read?user=" + user).read()
+        loadSeconds = settings.getLOADSECONDS()
+        host = settings.getHOST()
+        contents = urllib.request.urlopen("http://" + host + ":" + port + "/read?user=" + user).read()
         if contents.decode('ascii')=='None':
-            print("End of iotCache data - sleeping 30 seconds...")
-            time.sleep(30)
+            print("End of iotCache data - sleeping " + str(loadSeconds) + " seconds...")
+            time.sleep(loadSeconds)
         else:
             print("Loading data:",time.time(),contents)
             data = json.loads(contents)
