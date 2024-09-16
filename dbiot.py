@@ -268,9 +268,11 @@ class Dbiot:
         # resultSeries = []
         series=[]
         for measurement in result:
-            umt = measurement["umt"]
-            value = measurement.get(str(device_id),0)
-            series.append({"name":datetime.fromtimestamp(int(umt)).isoformat(' '),"value":value})
+            # Only send measurements with a value
+            if (measurement.get(str(device_id),0)) :
+                umt = measurement["umt"]
+                value = measurement.get(str(device_id),0)
+                series.append({"name":datetime.fromtimestamp(int(umt)).isoformat(' '),"value":value})
         return series
 
     # def addToSeries(self,resultSeries,umt,device_id,value):
