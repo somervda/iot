@@ -33,7 +33,7 @@ app.add_middleware(
 def getRawMeasurements(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
     device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=0)], 
     timestamp: Annotated[int, Path(title="timestamp in seconds since 1Jan1970 to retrieve", ge=0)],
-    rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=1000)],
+    rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=5000)],
     grouping: Annotated[int, Path(title="grouping: 0=None, 1=5 minutes,2=15 minutes,3=hour,4=6 hours, 5=day,6=week,7=month,8=3 month,9=year", ge=0,le=9)]
     ):
 
@@ -48,7 +48,7 @@ def getRawMeasurements(application_id: Annotated[int, Path(title="application_id
 def getFlatMeasurements(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
     device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=0)], 
     timestamp: Annotated[int, Path(title="timestamp in seconds since 1Jan1970 to retrieve", ge=0)],
-    rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=1000)],
+    rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=5000)],
     grouping: Annotated[int, Path(title="grouping: 0=None, 1=5 minutes,2=15 minutes,3=hour,4=6 hours, 5=day,6=week,7=month,8=3 month,9=year", ge=0,le=9)]
     ):
     # Get single measurement and return results a flatend json table (one entry per umt time, with multiple values representing each device)
@@ -63,7 +63,7 @@ def getFlatMeasurements(application_id: Annotated[int, Path(title="application_i
 def getSeriesMeasurement(application_id: Annotated[int, Path(title="application_id: Set of application metrics to collect", ge=1)],
     device_id: Annotated[int, Path(title="devices_id: Device filter 0=All", ge=0)], 
     timestamp: Annotated[int, Path(title="timestamp in seconds since 1Jan1970 to retrieve", ge=0)],
-    rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=1000)],
+    rows: Annotated[int, Path(title="rows: Number of rows to retrieve", ge=1,le=5000)],
     grouping: Annotated[int, Path(title="grouping: 0=None, 1=5 minutes,2=15 minutes,3=hour,4=6 hours, 5=day,6=week,7=month,8=3 month,9=year", ge=0,le=9)],
     field: Annotated[str, Path(title="field name")]
     ):
